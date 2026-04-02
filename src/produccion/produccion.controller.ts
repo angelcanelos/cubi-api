@@ -1,3 +1,4 @@
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import {
   Body,
   Controller,
@@ -17,6 +18,8 @@ import { AddPiezaDto } from './dto/add-pieza.dto';
 import { CreateEntradaDto } from './dto/create-entrada.dto';
 import { ProduccionService } from './produccion.service';
 
+@ApiTags('Producción (Corte y Medición)')
+@ApiBearerAuth()
 @Controller('produccion')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ProduccionController {

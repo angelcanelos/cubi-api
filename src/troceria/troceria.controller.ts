@@ -16,7 +16,10 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { AddTrozaDto } from './dto/add-troza.dto';
 import { CreateEntradaDto } from './dto/create-entrada.dto';
 import { TroceriaService } from './troceria.service';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiTags('Trocería (Materia Prima)')
+@ApiBearerAuth()
 @Controller('troceria')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class TroceriaController {
