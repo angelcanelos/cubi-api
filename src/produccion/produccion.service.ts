@@ -47,8 +47,25 @@ export class ProduccionService {
     return entrada;
   }
 
+  async getSummary(id: number) {
+    const entrada = await this.prisma.entradaProduccion.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        fecha: true,
+        volumenTotal: true,
+        totalPiezas: true,
+        totalPiesTabla: true,
+      },
+    });
+    if (!entrada) {
+      throw new NotFoundException('Entrada de produccion no encontrada');
+    }
+    return entrada;
+  }
+
   async addPieza(entradaId: number, dto: AddPiezaDto) {
-    await this.ensureBorradorEntrada(entradaId);
+    await this.ensureEntradaExists(entradaId);
     const piesTabla = this.calculatePiesTabla(dto);
     const volumen = this.calculateVolumen(dto);
 
@@ -70,7 +87,7 @@ export class ProduccionService {
   }
 
   async removePieza(entradaId: number, piezaId: number) {
-    await this.ensureBorradorEntrada(entradaId);
+    await this.ensureEntradaExists(entradaId);
 
     const pieza = await this.prisma.piezaProduccion.findUnique({
       where: { id: piezaId },
@@ -81,6 +98,42 @@ export class ProduccionService {
 
     await this.prisma.piezaProduccion.delete({ where: { id: piezaId } });
     return this.recalculatePiezasTotals(entradaId);
+  }
+
+  async updatePieza(entradaId: number, piezaId: number, dto: import('./dto/update-pieza.dto').UpdatePiezaDto) {
+    await this.ensureEntradaExists(entradaId);
+    
+    const pieza = await this.prisma.piezaProduccion.findUnique({
+      where: { id: piezaId },
+    });
+    if (!pieza || pieza.entradaId !== entradaId) {
+      throw new NotFoundException('Pieza no encontrada en la entrada');
+    }
+
+    const mergedDto: AddPiezaDto = {
+      grueso: dto.grueso ?? pieza.grueso,
+      clase: dto.clase ?? pieza.clase,
+      ancho: dto.ancho ?? pieza.ancho,
+      largo: dto.largo ?? pieza.largo,
+      verde: dto.verde ?? pieza.verde,
+      estufa: dto.estufa ?? pieza.estufa,
+    };
+
+    const piesTabla = this.calculatePiesTabla(mergedDto);
+    const volumen = this.calculateVolumen(mergedDto);
+
+    await this.prisma.piezaProduccion.update({
+      where: { id: piezaId },
+      data: { ...dto, piesTabla, volumen },
+    });
+
+    return this.recalculatePiezasTotals(entradaId);
+  }
+
+  async removeEntrada(entradaId: number) {
+    await this.ensureEntradaExists(entradaId);
+    await this.prisma.piezaProduccion.deleteMany({ where: { entradaId } });
+    return this.prisma.entradaProduccion.delete({ where: { id: entradaId } });
   }
 
   async finalizar(entradaId: number) {
@@ -109,17 +162,12 @@ export class ProduccionService {
     });
   }
 
-  private async ensureBorradorEntrada(entradaId: number) {
+  private async ensureEntradaExists(entradaId: number) {
     const entrada = await this.prisma.entradaProduccion.findUnique({
       where: { id: entradaId },
     });
     if (!entrada) {
       throw new NotFoundException('Entrada de produccion no encontrada');
-    }
-    if (entrada.estado !== Estado.BORRADOR) {
-      throw new BadRequestException(
-        'Solo se permiten cambios en entradas BORRADOR',
-      );
     }
     return entrada;
   }

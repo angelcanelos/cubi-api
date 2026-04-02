@@ -40,6 +40,12 @@ export class ProduccionController {
     return this.produccionService.findOne(id);
   }
 
+  @Get(':id/summary')
+  @Roles(Role.ADMIN, Role.JEFATURA)
+  getSummary(@Param('id', ParseIntPipe) id: number) {
+    return this.produccionService.getSummary(id);
+  }
+
   @Post(':id/piezas')
   @Roles(Role.ADMIN)
   addPieza(
@@ -56,6 +62,22 @@ export class ProduccionController {
     @Param('piezaId', ParseIntPipe) piezaId: number,
   ) {
     return this.produccionService.removePieza(id, piezaId);
+  }
+
+  @Patch(':id/piezas/:piezaId')
+  @Roles(Role.ADMIN)
+  updatePieza(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('piezaId', ParseIntPipe) piezaId: number,
+    @Body() dto: import('./dto/update-pieza.dto').UpdatePiezaDto,
+  ) {
+    return this.produccionService.updatePieza(id, piezaId, dto);
+  }
+
+  @Delete(':id')
+  @Roles(Role.ADMIN)
+  removeEntrada(@Param('id', ParseIntPipe) id: number) {
+    return this.produccionService.removeEntrada(id);
   }
 
   @Patch(':id/finalizar')

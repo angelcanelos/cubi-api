@@ -7,6 +7,7 @@ import { ProduccionModule } from './produccion/produccion.module';
 import { TroceriaModule } from './troceria/troceria.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AuthModule } from './auth/auth.module';
     ProduccionModule,
     UsersModule,
     AuthModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

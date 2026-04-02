@@ -40,6 +40,12 @@ export class TroceriaController {
     return this.troceriaService.findOne(id);
   }
 
+  @Get(':id/summary')
+  @Roles(Role.ADMIN, Role.JEFATURA)
+  getSummary(@Param('id', ParseIntPipe) id: number) {
+    return this.troceriaService.getSummary(id);
+  }
+
   @Post(':id/trozas')
   @Roles(Role.ADMIN)
   addTroza(
@@ -56,6 +62,22 @@ export class TroceriaController {
     @Param('trozaId', ParseIntPipe) trozaId: number,
   ) {
     return this.troceriaService.removeTroza(id, trozaId);
+  }
+
+  @Patch(':id/trozas/:trozaId')
+  @Roles(Role.ADMIN)
+  updateTroza(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('trozaId', ParseIntPipe) trozaId: number,
+    @Body() dto: import('./dto/update-troza.dto').UpdateTrozaDto,
+  ) {
+    return this.troceriaService.updateTroza(id, trozaId, dto);
+  }
+
+  @Delete(':id')
+  @Roles(Role.ADMIN)
+  removeEntrada(@Param('id', ParseIntPipe) id: number) {
+    return this.troceriaService.removeEntrada(id);
   }
 
   @Patch(':id/finalizar')
