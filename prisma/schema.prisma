@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  JEFATURA
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  nombres   String
+  apellidos String
+  role      Role     @default(JEFATURA)
+  createdAt DateTime @default(now())
+}
+
+enum Estado {
+  BORRADOR
+  FINALIZADO
+}
+
+model EntradaTroceria {
+  id           Int      @id @default(autoincrement())
+  fecha        DateTime
+  turno        String
+  aserradero   String
+  origen       String
+  clase        Int
+  estado       Estado   @default(BORRADOR)
+  volumenTotal Float    @default(0)
+  totalTrozas  Int      @default(0)
+  createdAt    DateTime @default(now())
+  trozas       Troza[]
+}
+
+model Troza {
+  id        Int             @id @default(autoincrement())
+  entradaId Int
+  diametro1 Float
+  diametro2 Float
+  largo     Float
+  descuento Float
+  volumen   Float
+  createdAt DateTime        @default(now())
+  entrada   EntradaTroceria @relation(fields: [entradaId], references: [id])
+}
+
+model EntradaProduccion {
+  id             Int               @id @default(autoincrement())
+  fecha          DateTime
+  turno          String
+  aserradero     String
+  estado         Estado            @default(BORRADOR)
+  volumenTotal   Float             @default(0)
+  totalPiezas    Int               @default(0)
+  totalPiesTabla Float             @default(0)
+  createdAt      DateTime          @default(now())
+  piezas         PiezaProduccion[]
+}
+
+model PiezaProduccion {
+  id        Int               @id @default(autoincrement())
+  entradaId Int
+  grueso    Float
+  clase     Int
+  ancho     Float
+  largo     Float
+  verde     Int
+  estufa    Int
+  piesTabla Float
+  volumen   Float
+  createdAt DateTime          @default(now())
+  entrada   EntradaProduccion @relation(fields: [entradaId], references: [id])
+}
